@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "tabulator@5.4.3",
+      "destination": "wwwroot/lib/tabulator",
+      "files": [
+        "js/tabulator.min.js",
+        "css/tabulator_bootstrap5.min.css",
+        "css/tabulator_bootstrap5.css.map"
+      ]
+    },
+    {
+      "provider": "unpkg",
+      "library": "@microsoft/signalr@latest",
+      "destination": "wwwroot/js/signalr",
+      "files": [
+        "dist/browser/signalr.js",
+        "dist/browser/signalr.js"
+      ]
+    }
+  ]
+}

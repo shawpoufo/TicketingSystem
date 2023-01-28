@@ -1,0 +1,287 @@
+@model OrganisationViewModel
+
+<h1 class="text-center">@Model.Name</h1>
+
+<div class="container">
+    
+   @await Html.PartialAsync("_Nav",("dashboard",Model.Id))
+
+
+    <div class="row row-cols-auto g-2">
+
+        @await Html.PartialAsync("_OrganisationCard",("openTicketsCard","Open Tickets","0"))
+        @await Html.PartialAsync("_OrganisationCard",("onlineUsersCardContentId","Online Users","0"))
+
+
+    </div>
+
+
+    <div class="row mt-3">
+        <div class="col">
+            <div>
+                <button id="openTicketBtn" type="button" class="btn btn-primary position-relative ms-5">
+                    open
+                    <span id="openBadge" class="visually-hidden position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        
+                    </span>
+                </button>
+
+                <button id="processingTicketBtn" type="button" class="btn btn-outline-secondary position-relative ms-5" >
+                    Processing
+                </button>
+
+                <button id="closedTicketBtn" type="button" class="btn btn-outline-secondary position-relative ms-5" >
+                    Closed
+
+                </button>
+
+            </div>
+        </div>
+        <div class="col-2">
+
+        </div>
+    </div>
+
+    <div id="wrapper" class="row mt-3">
+
+    </div>
+
+
+    <div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="assignModalTitle">Modal title</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4>Description</h4>
+                <div id="assignModalContent">
+                    
+                    
+                </div>
+                <div id="agentList">
+                    <h5>Agents</h5>
+                    <select id="agentSelect" class="form-select" asp-items="@Model.Agents"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button id="btnAssign" type="button" class="btn btn-primary">Assign</button>
+            </div>
+            </div>
+        </div>
+    </div>  
+
+
+
+</div>
+
+
+</div>
+
+@section Scripts{
+
+<script src="~/lib/tabulator/js/tabulator.min.js"></script>
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder().withUrl("/hub/user").build();
+    const cnnTicket = new signalR.HubConnectionBuilder().withUrl("/hub/ticket").build();
+
+    cnnTicket.start();
+
+
+    const onlineUsersCard = document.getElementById("onlineUsersCardContentId")
+    let userCounter = 0;
+    let newOpenTicketCounter = 0;
+
+    connection.on("UserConnected",function(user){
+        connection.invoke("GetAllConnected",@Model.Id)
+        .then(response => 
+        {
+            userCounter = response.length
+            onlineUsersCard.innerText = userCounter
+        })
+    })
+    connection.on("UserDisConnected",function(user){
+        connection.invoke("GetAllConnected",@Model.Id)
+        .then(response => 
+        {
+            userCounter = response.length
+            onlineUsersCard.innerText = userCounter
+        })
+    })
+    cnnTicket.on("TicketAdded",function(ticket){
+        tickets.unshift(ticket)
+        
+        newOpenTicketCounter += 1
+        document.getElementById("openBadge").innerText = newOpenTicketCounter
+        document.getElementById("openBadge").classList.remove("visually-hidden")
+    })
+
+    cnnTicket.on("TicketClosed",function(ticketId){
+        console.log("CLOSED CALL")
+        const index = tickets.findIndex(t => t.id == ticketId)
+        console.log(index)
+        if(index !== -1)
+            tickets[index].status = "Closed"
+
+    })
+
+    connection.start()
+    .then(function () {
+        onlineUsersCard.innerText = userCounter
+        connection.invoke("GetAllConnected",@Model.Id).
+        then(response => {
+            userCounter = response.length
+            onlineUsersCard.innerText = userCounter
+        })
+    }).catch(function (err) {
+        return console.error(err.toString());
+    });
+</script>
+<script>
+    let tickets = []
+    function loadData() {
+        const d = fetch("http://localhost:5297/ticket/@Model.Id", {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            tickets = data
+            const ft = filterTicketsByStatus("New")
+            changeOpenCardValue(ft.length)
+            table.setData(ft)
+        })
+
+    }
+
+    function filterTicketsByStatus(status) {
+        return tickets.filter(t => t.status === status)
+    }
+
+    function changeOpenCardValue(value){
+        document.getElementById("openTicketsCard").innerText = value;
+    }
+
+    function activateCssButton(button,cssClass){
+        btns.forEach(btn =>{
+            btn.setAttribute("class","btn btn-outline-secondary position-relative ms-5")
+        })
+        button.setAttribute("class",`btn ${cssClass} position-relative ms-5`)
+    }
+    const colDefinition = [
+        {title:"id",field:"id",sorter:"number"},
+        {title:"Status",field:"status",},
+        {title:"Client",field:"clientName",},
+        {title:"Issue date",field:"createdAt"},
+        {title:"Agent",field:"agentName",visible:false}
+    ]
+    const table = new Tabulator("#wrapper", {
+        columns:colDefinition,
+        height: 500,
+        index: "id",
+        pagination: true,
+        paginationSize: 25,
+    });
+
+    table.on("tableBuilt", function () {
+        loadData()
+    })
+
+    //======== BUTTONS =========//
+    const btnProcessing = document.getElementById("processingTicketBtn")
+    const btnOpen = document.getElementById("openTicketBtn")
+    const btnClosed = document.getElementById("closedTicketBtn")
+    const selectAgent = document.getElementById("agentSelect")
+    const btnAssign = document.getElementById("btnAssign")
+
+    const btns = new Map(); 
+    btns.set(btnProcessing.getAttribute("id"),btnProcessing)
+    btns.set(btnOpen.getAttribute("id"),btnOpen)
+    btns.set(btnClosed.getAttribute("id"),btnClosed)
+
+  
+    btnOpen.addEventListener("click", (e) => {
+        activateCssButton(btnOpen,"btn-primary")
+        table.hideColumn("agentName")
+        table.replaceData(filterTicketsByStatus("New"))
+        document.getElementById("openBadge").classList.add("visually-hidden")
+        newOpenTicketCounter = 0
+    })
+    
+    btnProcessing.addEventListener("click", (e) => {
+        activateCssButton(btnProcessing,"btn-warning")
+        table.showColumn("agentName")
+        table.replaceData(filterTicketsByStatus("Processing"))
+    })
+    
+    btnClosed.addEventListener("click", (e) => {
+        activateCssButton(btnClosed,"btn-danger")
+        table.showColumn("agentName")
+        table.replaceData(filterTicketsByStatus("Closed"))
+    })
+
+    btnAssign.addEventListener("click",(e)=>{
+        const index = selectAgent.selectedIndex
+        if(index == 0)
+            return
+        const agentId = selectAgent.item(index).value
+        assign(rowData.id,agentId)
+        @* console.log(rowData.id , agentId) *@
+    })
+
+    //========= TABLE MANIPULATION ==========//
+    const assignModal = new bootstrap.Modal('#assignModal')
+    let rowData = {};
+    table.on("rowClick", function(e, row){
+        //e - the click event object
+        //row - row component
+        assignModal.toggle()
+        rowData = row.getData()
+        document.getElementById("assignModalTitle").innerHTML = rowData.title
+        document.getElementById("assignModalContent").innerHTML = rowData.description
+    });
+    //---------------------------------------------
+    function assign(ticketId,agentId){
+        fetch(`http://localhost:5297/ticket/${ticketId}/assign/${agentId}`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => {
+            if (!response.ok) 
+                throw new Error('Network response was not OK');
+            
+            return response.json()
+        })
+        .then(data => {
+            updateTicketsArray(data)
+            assignModal.hide()
+        })
+        .catch(error =>{
+            console.log("ERROR:"+error)
+        })
+    }
+    //-------------------------------------
+    function updateTicketsArray(updatedTicket){
+        tickets.forEach(t => {
+            if(t.id === updatedTicket.id){
+                t.agentId = updatedTicket.agentId
+                t.agentName = updatedTicket.agentName
+                t.status = updatedTicket.status
+                
+            }
+        })
+        console.log(tickets.filter(t => t.id === updatedTicket.id))
+        table.setData(filterTicketsByStatus("New"))
+    }
+
+
+
+</script>
+}

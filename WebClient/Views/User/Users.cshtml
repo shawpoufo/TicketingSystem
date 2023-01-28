@@ -1,0 +1,94 @@
+@model UserViewModel
+
+<h1 class="text-center">@Model.OrganisationName</h1>
+<div class="container">
+    @if(ViewData["Error"] != null){
+        <h1 class="text-danger">@ViewData["Error"]</h1>
+    }
+    @await Html.PartialAsync("_Nav",(Model.RoleId == 1 ? "clients":"agents",Model.OrganisationId))
+
+    <div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalForm"
+            >
+            Add
+        </button>
+    </div>
+    
+    @await Html.PartialAsync("_UsersForm")
+
+    <div id="wrapper" class="row"></div>
+</div>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial"/>
+    <script src="~/lib/tabulator/js/tabulator.min.js"></script>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+
+
+    <script>
+        function statusFormatter(cell){
+            let cssClass = "success"
+            if(cell.getValue() === "Offline")
+                cssClass = "danger"
+            return `<span class="badge rounded-pill bg-${cssClass}"> ${cell.getValue()}</span>`
+        }
+        const colDefinition =[
+            {title:"ID",field:"id"},
+            {title:"Name",field:"name"},
+            {title:"Status",field:"status" , formatter:statusFormatter},
+        ]
+        const table = new Tabulator("#wrapper", {
+            columns:colDefinition,
+            height: 500,
+            index: "id",
+            pagination: true,
+            paginationSize: 25,
+            reactiveData:true,
+            layout:"fitData",
+        });
+        let users = []
+
+        function loadData(){
+            fetch("http://localhost:5297/organisation/@Model.OrganisationId/users/role/@Model.RoleId", {
+            headers: {
+                'Accept': 'application/json'
+            }
+
+            })
+            .then(response => response.json())
+            .then(data => {
+                users = data
+                table.setData(users)
+            })
+        }
+
+        table.on("tableBuilt", function () {
+            loadData()
+        })
+
+
+        //=========== SIGNALR ====================//
+    const connection = new signalR.HubConnectionBuilder().withUrl("/hub/user").build();
+
+    connection.on("UserConnected",function(userId){
+        const index = users.findIndex(u => u.id == userId)
+        users[index].status = "Online"
+        console.info("UserConnected",users[index])
+    })
+    connection.on("UserDisConnected",function(userId){
+        const index = users.findIndex(u => u.id == userId)
+        users[index].status = "Offline"
+        console.log("UserDisConnected",users[index])
+    })
+
+    connection.start()
+    .then(function () {
+        connection.invoke("GetAllConnected",@Model.OrganisationId)
+    }).catch(function (err) {
+        return console.error(err.toString());
+    });
+
+
+
+    </script>
+}

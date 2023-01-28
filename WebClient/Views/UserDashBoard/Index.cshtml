@@ -1,0 +1,238 @@
+@model UserDashBoardViewModel
+
+<div class="container">
+    <h2 class="text-center">@Model.OrganisationName</h2>
+    <div class="row">
+        <div class="col-8 shadow-lg rounded p-2">
+            @if(Model.RoleId == 1){
+                <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modal-ticket">
+                    New Ticket
+                </button>
+            }
+            <div id="wrapper"></div>
+        </div>
+        <div id="secondCol" class="col-4 visually-hidden">
+            <div class="d-flex flex-column shadow-lg m-2 p-2 rounded h-50 overflow-scroll ">
+                <h3 class="text-center">Ticket Detail</h3>
+                <h4 id="ticketTitle" class="text-center"></h4>
+                <div id="ticketDescription">
+
+                </div>
+            </div>
+            <div class="row m-2" >
+                @if(Model.RoleId == 1)
+                {
+                    <button id="btnClose" class="btn btn-outline-danger" onclick="closeTicket()">Close</button>
+                }
+            </div>
+            <div class="row row-cols-1 shadow-lg m-2 rounded overflow-scroll" style="height:250px;">
+                <div id="chatBox"class="col overflow-scroll h-75 ">
+
+                </div>
+                <div class="col align-self-end ">
+                    <div class="row">
+                        <input id="textMessage" type="text" name="" id="" class="col">
+                        <input id="btnSend" type="button" value="Send" class="col-auto btn btn-outline-dark">
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*===== MODAL ==== *@
+
+<div class="modal fade" id="modal-ticket" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <form id="ticketForm">
+        <input type="hidden" asp-for="OpenTicketVM.OrganisationId">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="assignModalTitle">Add New Ticket</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" asp-for="OpenTicketVM.Title" />
+                    <span class="form-text text-danger" asp-validation-for="OpenTicketVM.Title"></span>
+
+
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea type="text" class="form-control" asp-for="OpenTicketVM.Description" rows="3"> </textarea>
+                    <span class="form-text text-danger" asp-validation-for="OpenTicketVM.Description"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button id="btnAssign" type="submit" class="btn btn-primary">Add</button>
+            </div>
+
+        </div>
+
+    </div>
+    </form>
+</div>
+
+
+@section Scripts{
+<partial name="_ValidationScriptsPartial" />
+<script src="~/lib/tabulator/js/tabulator.min.js"></script>
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+
+<script>
+       // ====================== GLOBAL OBJECTS ==================//
+    // for some reasons :)
+    var connection = new signalR.HubConnectionBuilder().withUrl("/hub/user").build();
+    var cnnTicket = new signalR.HubConnectionBuilder().withUrl("/hub/ticket").build();
+    var selectedDataRow = null
+    var tickets = []
+    // =====================================================//
+</script>
+
+<script src="~/js/ticketApi.js"></script>
+<script src="~/js/conversationApi.js"></script>
+
+<script>
+
+ 
+    
+
+    connection.start()
+    .then(function () {
+        connection.invoke("JoinOrganisationHub")
+    })    
+    .catch(err => {
+            return console.error(err.toString())
+    });
+
+    cnnTicket.on("TicketAssigned",function(ticket){
+        const index = tickets.findIndex(t => t.id == ticket.id)
+        cnnTicket.invoke("JoinTicketHub",ticket.id)
+        if(index === -1)
+            tickets.unshift(ticket)
+        else
+        {
+            tickets[index].agentName = ticket.agentName
+            tickets[index].status = ticket.status
+        }
+    })
+
+
+    cnnTicket.on("TicketClosed",function(ticketId){
+        console.log("CLOSED CALL")
+        const index = tickets.findIndex(t => t.id == ticketId)
+        console.log(index)
+        if(index !== -1)
+        {
+            tickets[index].status = "Closed"
+            document.getElementById("btnSend").disabled = true
+            document.getElementById("textMessage").disabled = true
+            document.getElementById("btnClose").classList.add("visually-hidden")
+        }
+
+    })
+
+
+    
+
+        
+</script>
+
+<script>
+
+    //============ variable declarations ==============
+    const modal = new bootstrap.Modal('#modal-ticket')
+
+    const colDefinition = [
+        { title: "id", field: "id", sorter: "number" },
+        { title: "Status", field: "status", formatter:StatusFormatter },
+        { title: "Issue date", field: "createdAt" },
+        { title: "Agent", field: "agentName" }
+    ]
+
+    var table = new Tabulator("#wrapper", {
+        columns: colDefinition,
+        height: 700,
+        index: "id",
+        pagination: true,
+        paginationSize: 25,
+        reactiveData:true,
+        layout:"fitData",
+    });
+    //============CUSTOM FORMATTER )==============
+
+    function StatusFormatter(cell, formatterParams, onRendered){
+ 
+        switch(cell.getValue()){
+            case 'New':cssClass="success";break
+            case 'Processing':cssClass="warning";break;
+            default : cssClass="danger"
+        }
+        return `<span class="badge rounded-pill bg-${cssClass}"> ${cell.getValue()} </span>`
+    }
+    //============= TABULATOR events ===========
+    table.on("tableBuilt", function () {
+        loadData()
+        cnnTicket.start()
+        .then(()=>{
+            tickets.forEach(t =>{
+                if(t.status === "New" || t.status === "Processing"){
+                    cnnTicket.invoke("JoinTicketHub",t.id)
+                    .then(()=>{})
+                    .catch(err =>{
+                        return console.error("Can't join ticket group")
+                    })
+                }
+            }) 
+        })
+    })
+    table.on("rowClick", (e, r) => {
+        document.getElementById("secondCol").classList.remove("visually-hidden")
+        document.getElementById("chatBox").textContent = ''
+        document.getElementById("chatBox").innerHTML = ''
+        selectedDataRow = r.getData()
+        document.getElementById("ticketTitle").innerText = r.getData().title
+        document.getElementById("ticketDescription").innerText = r.getData().description
+        loadConversation(selectedDataRow.id)
+        if(selectedDataRow.status == "Closed")
+        {
+            document.getElementById("btnSend").disabled = true
+            document.getElementById("textMessage").disabled = true
+            document.getElementById("btnClose").classList.add("visually-hidden")
+        }
+        else{
+            document.getElementById("textMessage").disabled = false
+            document.getElementById("btnSend").disabled = false
+            document.getElementById("btnClose").classList.remove("visually-hidden")
+        }
+        
+    })
+    //------- FORM SUBMITION -----//
+    document.getElementById("ticketForm").addEventListener("submit",(e)=>{
+        e.preventDefault();
+        
+        const Title = document.getElementById("OpenTicketVM_Title")
+        const Description = document.getElementById("OpenTicketVM_Description")
+        const OrganisationId = document.getElementById("OpenTicketVM_OrganisationId")
+
+        if(Title.value !== "" && Description.value !== "")
+        {
+            const ticket = {
+                Title:Title.value,
+                Description:Description.value,
+                OrganisationId:OrganisationId.value
+            };
+            CreateTicket(ticket)
+            modal.hide()
+            Title.value = ""
+            Description.value = ""
+        }
+    })
+</script>
+}

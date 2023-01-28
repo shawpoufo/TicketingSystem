@@ -1,0 +1,40 @@
+@model UserViewModel
+
+
+<div class="modal fade" id="modalForm" tabindex="-1" aria-labelledby="modalFormAria" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modalFormAria">Create new User</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-route="createUser" asp-route-orgId="@Model.OrganisationId" method="post">
+                <input type="hidden" asp-for="OrganisationId"/>
+                <input type="hidden" asp-for="RoleId"/>
+                <input type="hidden" asp-for="OrganisationName"/>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" asp-for="Name"></label>
+                        <input class="form-control" asp-for="Name">
+                        <span class="form-text text-danger" asp-validation-for="Name"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" asp-for="UserName"></label>
+                        <input class="form-control" asp-for="UserName">
+                        <span class="form-text text-danger" asp-validation-for="UserName"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" asp-for="Password"></label>
+                        <input class="form-control" asp-for="Password">
+                        <span class="form-text text-danger" asp-validation-for="Password"></span>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

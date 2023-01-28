@@ -1,0 +1,12 @@
+@model (string cardContentId,string cardTitle,string cardContent)
+
+<div class="col card">
+    <div class="card-body">
+        <h3 class="card-title">
+            @Model.cardTitle
+        </h3>
+        <p id="@Model.cardContentId" class="card-text">
+            @Model.cardContent
+        </p>
+    </div>
+</div>

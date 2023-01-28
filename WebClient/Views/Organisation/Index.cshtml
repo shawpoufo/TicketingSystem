@@ -1,0 +1,46 @@
+@model (List<Organisation>? orgs,int managerid)
+
+@{
+    var rand = new Random();
+    var randomColor = () => rand.Next(11111111,16777215).ToString("X4"); 
+    
+}
+
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalForm" data-bs-managerid="@Model.managerid">
+    Add
+</button>
+
+<div class="container d-flex flex-wrap">
+    @if (Model.orgs != null)
+    {
+        @foreach (var org in Model.orgs)
+        {
+                <a asp-action="detail" asp-route-id="@org.Id" class="profileImage2 text-decoration-none">
+                    <div class="profileImage text-center " style="background-color:#@randomColor()">
+                        @org.Name
+                    </div>
+                </a>
+        }
+        
+    }
+
+</div>
+
+@* MODAL *@
+@await Html.PartialAsync("_OrganisationForm" , new OrganisationViewModel())
+
+
+@section Scripts{
+    <script>
+        const modalForm = document.getElementById('modalForm')
+        const managerIdHidden = document.getElementById('managerId')
+
+        modalForm.addEventListener('show.bs.modal', event => {
+            const button = event.relatedTarget
+            const managerId = button.getAttribute('data-bs-managerid')
+            managerIdHidden.value = managerId
+
+        })
+    </script>
+
+}

@@ -1,0 +1,27 @@
+@using Microsoft.AspNetCore.Html
+@model (string activeNave , int organisationId)
+
+@{
+
+    var active = (string navText) => Model.activeNave == navText ? new HtmlString("nav-link active"): new HtmlString("nav-link");
+}
+
+
+<ul class="nav nav-tabs mb-1">
+    <li class="nav-item">
+        <a asp-action="detail" asp-controller="organisation" asp-route-id="@Model.organisationId"
+        class='@(active("dashboard"))'>
+         Dashboard</a>
+    </li>
+    <li class="nav-item">
+        <a asp-route="clients" asp-route-orgId="@Model.organisationId" 
+        class='@(active("clients"))'>
+        Clients</a>
+    </li>
+    <li class="nav-item">
+        <a asp-route="agents" asp-route-orgId="@Model.organisationId" 
+        class='@(active("agents"))'>
+        Agents</a>
+    </li>
+
+</ul>

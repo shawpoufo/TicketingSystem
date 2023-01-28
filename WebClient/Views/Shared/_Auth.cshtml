@@ -1,0 +1,27 @@
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@inject IAuthorizationService AuthorizationService
+@inject UserService _userService;
+@model (bool isAuthenticated , bool isAdmin);
+
+@{
+    OrgUser? user = null;
+    if(Model.isAuthenticated == true && Model.isAdmin == false && User.GetId().HasValue)
+    {
+        user = (await _userService.Get(User.GetId()!.Value));
+    }
+
+}
+
+@if(Model.isAuthenticated){
+    @* <label class="text-light  me-3 mt-1">@User.Identity.Name</label> *@
+    <div class="fw-bold fs-4 me-2 font-monospace">@(user?.Name ?? "ADMIN")</div>
+
+    <a class="btn btn-outline-danger" asp-action="logout" asp-controller="account">
+        Signout
+    </a>
+}
+else{
+    <a class="btn btn-outline-primary me-3" asp-action="Login" asp-controller="account">Login</a>
+    <a class="btn btn-outline-primary" asp-action="signup" asp-controller="account">Signup</a>
+}
