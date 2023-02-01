@@ -115,16 +115,19 @@
         tickets.unshift(ticket)
         
         newOpenTicketCounter += 1
+        changeOpenCardValue(filterTicketsByStatus("New").length)
         document.getElementById("openBadge").innerText = newOpenTicketCounter
         document.getElementById("openBadge").classList.remove("visually-hidden")
     })
 
     cnnTicket.on("TicketClosed",function(ticketId){
-        console.log("CLOSED CALL")
+        
         const index = tickets.findIndex(t => t.id == ticketId)
         console.log(index)
-        if(index !== -1)
+        if(index !== -1){
             tickets[index].status = "Closed"
+            changeOpenCardValue(filterTicketsByStatus("New").length)
+        }
 
     })
 
@@ -143,7 +146,7 @@
 <script>
     let tickets = []
     function loadData() {
-        const d = fetch("http://localhost:5297/ticket/@Model.Id", {
+        const d = fetch("http://localhost:5005/ticket/@Model.Id", {
             headers: {
                 'Accept': 'application/json'
             }
@@ -246,7 +249,7 @@
     });
     //---------------------------------------------
     function assign(ticketId,agentId){
-        fetch(`http://localhost:5297/ticket/${ticketId}/assign/${agentId}`, {
+        fetch(`http://localhost:5005/ticket/${ticketId}/assign/${agentId}`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',

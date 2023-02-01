@@ -1,6 +1,6 @@
 
     function CreateTicket(ticket){
-        fetch("http://localhost:5297/ticket",{
+        fetch("http://localhost:5005/ticket",{
             method:"POST",
             headers: {
                 'Accept': 'application/json',
@@ -22,7 +22,7 @@
     }
 
     function closeTicket(){
-        fetch(`http://localhost:5297/ticket/close/${selectedDataRow.id}`,{
+        fetch(`http://localhost:5005/ticket/close/${selectedDataRow.id}`,{
             method:"POST",
             headers: {
                 'Accept': 'application/json',
@@ -41,7 +41,7 @@
     }
 
     function loadData() {
-        const d = fetch("http://localhost:5297/ticket/user", {
+        const d = fetch("http://localhost:5005/ticket/user", {
             headers: {
                 'Accept': 'application/json'
             },

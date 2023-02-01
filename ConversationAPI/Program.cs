@@ -3,9 +3,12 @@ using ConversationAPI.Repository;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.WebHost.UseUrls("http://*:5004");
 builder.Services.AddDbContext<AppDbContext>(options=>
-    options.UseNpgsql(@"Host=localhost;Username=postgres;Password=postgres;Database=conversation"));
+    {
+        string cnnString = builder.Configuration.GetSection("UseDocker").Get<bool>() ? "DockerConnection":"DefaultConnection";
+        options.UseNpgsql(builder.Configuration.GetConnectionString(cnnString));
+    });
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddTransient<MessageRepository>();
 

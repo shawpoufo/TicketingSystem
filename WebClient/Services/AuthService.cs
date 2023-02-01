@@ -7,10 +7,12 @@ public class AuthService{
     private readonly HttpClient _httpClient;
     private const string _serviceName = "authservice";
     public int HI { get; set; }
-    public AuthService(HttpClient httpClient)
+    public AuthService(HttpClient httpClient,IConfiguration configuration)
     {
+        string gateWayHostName = configuration.GetSection("UseDocker").Get<bool>() ? "gateway" : "localhost";
+
         _httpClient = httpClient;
-        _httpClient.BaseAddress = new Uri("http://localhost:5000/");
+        _httpClient.BaseAddress = new Uri($"http://{gateWayHostName}:5000/");
         _httpClient.DefaultRequestHeaders.Add("accept","application/json");
     }
     

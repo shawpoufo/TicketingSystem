@@ -4,7 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using OrganisationAPI.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<AppDbContext>(o => o.UseNpgsql(@"Host=localhost;Username=postgres;Password=postgres;Database=Orgs"));
+builder.WebHost.UseUrls("http://*:5003");
+builder.Services.AddDbContext<AppDbContext>(options =>{
+    string cnnString = builder.Configuration.GetSection("UseDocker").Get<bool>() ? "DockerConnection":"DefaultConnection";
+    options.UseNpgsql(builder.Configuration.GetConnectionString(cnnString));
+});
 builder.Services.AddTransient<OrganisationRepository>();
 builder.Services.AddTransient<UserRepository>();
 builder.Services.AddControllers();

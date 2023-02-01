@@ -61,10 +61,9 @@ public class AuthController:ControllerBase{
         return Ok();
     }
 
-    [Authorize]
     public IActionResult Hi()
     {
-        return Ok();
+        return Ok("YAY");
     }
 
 }

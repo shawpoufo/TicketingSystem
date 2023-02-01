@@ -19,10 +19,7 @@ public class ApplicationDbContext : DbContext
         {
             
             base.OnModelCreating(modelBuilder);
-            // modelBuilder.Entity<Login>()
-            //     .HasOne<AppRole>()
-            //     .WithMany()
-            //     .HasForeignKey(l => l.RoleId);
+
 
             var adminRole = new AppRole{
                 Id = 1,
@@ -34,14 +31,14 @@ public class ApplicationDbContext : DbContext
                 Label = "User"
             });
             
-            var hasher = new PwdHash();
+            /*var hasher = new PwdHash();
             modelBuilder.Entity<Login>()
             .HasData(new {
                 Id = 1,
                 UserName = "admin",
                 RoleId = 1,
                 HashedPassword = hasher.ComputeHash("admin")
-            });
+            });*/
             
             
         }

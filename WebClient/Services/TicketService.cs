@@ -7,9 +7,11 @@ public class TicketService{
     private readonly UserService _userService;
     private const string _serviceName = "ticketservice";
 
-    public TicketService(HttpClient httpClient , UserService userService){
+    public TicketService(HttpClient httpClient , UserService userService,IConfiguration configuration){
+        string gateWayHostName = configuration.GetSection("UseDocker").Get<bool>() ? "gateway" : "localhost";
+
         _httpClient = httpClient;
-        _httpClient.BaseAddress = new Uri("http://localhost:5000/");
+        _httpClient.BaseAddress = new Uri($"http://{gateWayHostName}:5000/");
         _httpClient.DefaultRequestHeaders.Add("accept","application/json");
         _userService = userService;
     }

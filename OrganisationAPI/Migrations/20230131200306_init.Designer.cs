@@ -11,7 +11,7 @@ using OrganisationAPI.AppDBContext;
 namespace OrganisationAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230122014422_init")]
+    [Migration("20230131200306_init")]
     partial class init
     {
         /// <inheritdoc />

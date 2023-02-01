@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.WebHost.UseUrls("http://*:5001");
 // Add services to the container.
 
 
@@ -18,8 +18,10 @@ builder.Services.AddTransient<LoginRepository>();
 builder.Services.AddTransient<PasswordHasher<Login>>();
 builder.Services.AddTransient<PwdHash>();
 builder.Services.AddDbContext<ApplicationDbContext>(options=>
- options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-// options.UseInMemoryDatabase("abcd")
+ {
+    string cnnString = builder.Configuration.GetSection("UseDocker").Get<bool>() ? "DockerConnection":"DefaultConnection";
+    options.UseNpgsql(builder.Configuration.GetConnectionString(cnnString));
+ }
 );
 // builder.Services.AddHttpClient();
 // builder.Services.AddHttpContextAccessor();
@@ -41,7 +43,7 @@ if (app.Environment.IsDevelopment())
 }
 
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 

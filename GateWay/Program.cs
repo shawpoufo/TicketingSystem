@@ -1,9 +1,10 @@
 var builder = WebApplication.CreateBuilder(args);
-
+builder.WebHost.UseUrls("http://*:5000");
 // Add services to the container.
-
+var reverseProxyConfig = builder.Configuration.GetSection("UseDocker").Get<bool>() ? "ReverseProxyDocker":"ReverseProxy";
+Console.WriteLine(reverseProxyConfig);
 builder.Services.AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+    .LoadFromConfig(builder.Configuration.GetSection(reverseProxyConfig));
 
 
 var app = builder.Build();

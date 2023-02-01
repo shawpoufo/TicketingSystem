@@ -6,7 +6,7 @@
 
 function loadConversation(ticketId)
 {
-    fetch(`http://localhost:5297/conversation/${ticketId}`, {
+    fetch(`http://localhost:5005/conversation/${ticketId}`, {
         headers: {
             'Accept': 'application/json'
         },
@@ -41,7 +41,7 @@ function SendMessage(){
     }
 
 
-    fetch(`http://localhost:5297/conversation`,{
+    fetch(`http://localhost:5005/conversation`,{
         method:"POST",
         headers: {
             'Accept': 'application/json',
