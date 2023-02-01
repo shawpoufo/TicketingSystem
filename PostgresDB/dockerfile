@@ -1,0 +1,5 @@
+FROM postgres:14.2-alpine3.15
+
+COPY ./dbScript.sql /docker-entrypoint-initdb.d/.
+
+

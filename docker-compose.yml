@@ -1,0 +1,66 @@
+version: '3.9'
+services:
+  identity:
+    container_name: identity
+    build: ./CustomIdentityAPI
+    ports:
+      - 5001:5001
+    depends_on:
+      - asppostgres
+  gateway:
+    container_name: gateway
+    build: ./GateWay
+    ports:
+      - 5000:5000
+    depends_on:
+      - asppostgres
+      - identity
+  ticket:
+    container_name: ticket
+    build: ./TicketsAPI
+    ports:
+      - 5002:5002
+    depends_on:
+      - asppostgres
+      - identity
+      - gateway
+  organisation:
+    container_name: organisation
+    build: ./OrganisationAPI
+    ports:
+      - 5003:5003
+    depends_on:
+      - asppostgres
+      - identity
+      - gateway
+  conversation:
+    container_name: conversation
+    build: ./ConversationAPI
+    ports:
+      - 5004:5004
+    depends_on:
+      - asppostgres
+      - identity
+      - gateway
+  webclient:
+    container_name: webclient
+    build: ./WebClient
+    ports:
+      - 5005:5005
+    depends_on:
+      - asppostgres
+      - identity
+      - gateway
+  asppostgres:
+    container_name: asppostgres  
+    build: ./PostgresDB
+    ports:
+      - 6969:5432
+    volumes:
+      - pg1:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+
+volumes:
+  pg1:
+
