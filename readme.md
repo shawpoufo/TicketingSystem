@@ -15,5 +15,35 @@
  - Ticket : [http://localhost:5002](http://localhost:5002/)
  - Organisation : [http://localhost:5003](http://localhost:5003/)
  - Conversation : [http://localhost:5004](http://localhost:5004/)
+# Captures d'écran
+## Page d'acceuil
+![Home](https://github.com/shawpoufo/TicketingSystem/ProjectImgs/home.png)
+## Page de connection
+![Login](https://github.com/shawpoufo/TicketingSystem/ProjectImgs/login.png)
+## Page d'enregistrement
+![SignUp](https://github.com/shawpoufo/TicketingSystem/ProjectImgs/signup.png)
+## Page de list des organismes
+Un organisme est une entité qui rassemble tous vos clients de votre produit et les agents qui vont résoudre leur problème.
+![organisation](https://github.com/shawpoufo/TicketingSystem/ProjectImgs/organisation.png)
+## Formulaire pour ajouter un organisme
+![organisation](https://github.com/shawpoufo/TicketingSystem/ProjectImgs/organisationForm.png)
+## Tableau de bord de l'admin
+À partir de ce tableau de bord l'admin peut suivre l'état d'avancement des problèmes postuler par les clients en temps réel, chaque ticket est un problème qui doit être résolue par un agent, un ticket dispose de trois états.
+![adminDashboard](https://github.com/shawpoufo/TicketingSystem/ProjectImgs/adminDashboard.png)
+### Attribuer un ticket à un agent
+Afin de attribuer un ticket il va faloir avoire un agent sinon ajouter le dans l'onglet des agents
+![assignTickets](https://github.com/shawpoufo/TicketingSystem/ProjectImgs/assignTickets.png)
+## Onglet des client
+La page des clients affiche les clients d'un organisme choisi ainsi que l'état de leur présence (online/offline) en temps-réel
+![clientsList](https://github.com/shawpoufo/TicketingSystem/ProjectImgs/clientsList.png)
+## Tableau de bord du client
+à travers cette page le client peut :
+- Remplire un nouveau ticket
+- Consulter l'état d'anvancement des ticket
+- Communiquer en temps-réel (chat) avec l'agent
+*NOTE : l'agent dispose d'une interface similaire*
+![clientDashboard](https://github.com/shawpoufo/TicketingSystem/ProjectImgs/clientDashboard.png)
+
+
 
 
