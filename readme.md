@@ -17,9 +17,11 @@
  - Conversation : [http://localhost:5004](http://localhost:5004/)
 # Captures d'écran
 ## Page d'acceuil
-![Home](/TicketingSystem/ProjectImgs/home.png)
+![Home](https://github.com/shawpoufo/TicketingSystem/ProjectImgs/home.png)
+![1675435904521](image/readme/1675435904521.png)
+
 ## Page de connection
-![Login!](https://github.com/shawpoufo/TicketingSystem/ProjectImgs/login.png)
+![Login](https://github.com/shawpoufo/TicketingSystem/ProjectImgs/login.png)
 ## Page d'enregistrement
 ![SignUp](https://github.com/shawpoufo/TicketingSystem/ProjectImgs/signup.png)
 ## Page de list des organismes
